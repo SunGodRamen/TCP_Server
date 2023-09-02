@@ -1,11 +1,17 @@
-// message_protocol.h
-
 #ifndef MESSAGE_PROTOCOL_H
 #define MESSAGE_PROTOCOL_H
-#pragma once
 
 #include "logger.h"
 #include <stdint.h>
+
+#ifndef MESSAGE_SIZE_BYTES
+#define MESSAGE_SIZE_BYTES 8 // 64 bits
+#endif
+
+#ifndef MESSAGE_SIZE_BITS
+#define MESSAGE_SIZE_BITS MESSAGE_SIZE_BYTES*8
+#endif
+
 //   TCP Message Protocol_v1  64 bits
 // 
 //    - Request:
@@ -43,7 +49,9 @@ typedef enum {
 
 void interpret_message(uint64_t message, MessageType* result);
 void extract_request_uri(uint64_t message, uint64_t* uri);
+void extract_request_id_and_data(uint64_t message, uint64_t* request_id, uint64_t* data);
 void encode_confirmation(uint64_t request_id, uint64_t* encoded);
 void encode_response(uint64_t request_id, uint64_t data, uint64_t* encoded);
+void encode_request(uint64_t uri, uint64_t* encoded);
 
 #endif

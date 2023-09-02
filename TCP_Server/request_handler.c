@@ -4,12 +4,8 @@
 
 uint64_t handle_request(uint64_t uri) {
     // Handle the request based on the operation type
-    char buffer[MAX_LOG_SIZE];
     switch (uri) {
     case OPERATION_GET_TIME:
-        snprintf(buffer, sizeof(buffer), "Timestamp request received");
-        write_log(buffer);
-        memset(buffer, 0, sizeof(buffer));
         return get_timestamp();
 
     // Sample case for another operation *
@@ -18,9 +14,7 @@ uint64_t handle_request(uint64_t uri) {
 
     case UNKNOWN_OPERATION:
     default:
-        snprintf(buffer, sizeof(buffer), "Unknown request operation");
-        write_log(buffer);
-        memset(buffer, 0, sizeof(buffer));
+        write_log_uint64_hex(_ERROR, "unknown request uri", uri);
         return 0; // or some error code in your protocol
     }
 }

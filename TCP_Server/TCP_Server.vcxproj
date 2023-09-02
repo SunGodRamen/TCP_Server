@@ -139,7 +139,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="logger.h" />
-    <ClInclude Include="main.h" />
     <ClInclude Include="message_protocol.h" />
     <ClInclude Include="request_handler.h" />
     <ClInclude Include="tcp_server.h" />
