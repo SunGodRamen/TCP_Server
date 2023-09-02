@@ -10,6 +10,8 @@
 
 #ifndef MESSAGE_SIZE_BITS
 #define MESSAGE_SIZE_BITS MESSAGE_SIZE_BYTES*8
+#else
+#define MESSAGE_SIZE_BITS 64
 #endif
 
 //   TCP Message Protocol_v1  64 bits
