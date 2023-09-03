@@ -136,12 +136,15 @@
     <ClCompile Include="message_protocol.c" />
     <ClCompile Include="request_handler.c" />
     <ClCompile Include="tcp_server.c" />
+    <ClCompile Include="tcp_server_thread.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="config.h" />
     <ClInclude Include="logger.h" />
     <ClInclude Include="message_protocol.h" />
     <ClInclude Include="request_handler.h" />
     <ClInclude Include="tcp_server.h" />
+    <ClInclude Include="tcp_server_thread.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

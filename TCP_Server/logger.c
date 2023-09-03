@@ -4,7 +4,6 @@
  * Constants for maximum log size and general buffer size for temporary string operations.
  */
 #define MAX_LOG_SIZE 512
-#define BUFFER_SIZE 4096
 
  /**
   * Internal variables to keep track of the log file and mutex.
@@ -70,7 +69,7 @@ void write_log(LogLevel level, const char* message) {
  * @param ... Variable arguments for the format string.
  */
 void write_log_format(LogLevel level, const char* format, ...) {
-    char buffer[BUFFER_SIZE];
+    char buffer[MAX_LOG_SIZE];
     va_list args;
     va_start(args, format);
     vsnprintf(buffer, sizeof(buffer), format, args);
@@ -105,7 +104,7 @@ void bytes_to_hex_string(const unsigned char* data, size_t data_len, char* out_s
  * @param data_len The length of the byte array.
  */
 void write_log_byte_array(LogLevel level, const unsigned char* data, size_t data_len) {
-    char buffer[BUFFER_SIZE]; // Make sure BUFFER_SIZE is large enough to hold the hex string
+    char buffer[MAX_LOG_SIZE]; // Make sure BUFFER_SIZE is large enough to hold the hex string
     bytes_to_hex_string(data, data_len, buffer, sizeof(buffer));
     write_to_log_file(level, buffer);
 }
@@ -118,7 +117,7 @@ void write_log_byte_array(LogLevel level, const unsigned char* data, size_t data
  * @param value The 64-bit unsigned integer to log.
  */
 void write_log_uint64_dec(LogLevel level, const char* message, uint64_t value) {
-    char buffer[BUFFER_SIZE];
+    char buffer[MAX_LOG_SIZE];
     snprintf(buffer, sizeof(buffer), "%s: %llu", message, value);
 
     write_to_log_file(level, buffer);
@@ -132,7 +131,7 @@ void write_log_uint64_dec(LogLevel level, const char* message, uint64_t value) {
  * @param value The 64-bit unsigned integer to log.
  */
 void write_log_uint64_hex(LogLevel level, const char* message, uint64_t value) {
-    char buffer[BUFFER_SIZE];
+    char buffer[MAX_LOG_SIZE];
     snprintf(buffer, sizeof(buffer), "%s: 0x%llx", message, value);
 
     write_to_log_file(level, buffer);
@@ -146,7 +145,7 @@ void write_log_uint64_hex(LogLevel level, const char* message, uint64_t value) {
  * @param value The 64-bit unsigned integer to log.
  */
 void write_log_uint64_bin(LogLevel level, const char* message, uint64_t value) {
-    char buffer[BUFFER_SIZE];
+    char buffer[MAX_LOG_SIZE];
     char binaryStr[65];
 
     for (int i = 63; i >= 0; i--) {
