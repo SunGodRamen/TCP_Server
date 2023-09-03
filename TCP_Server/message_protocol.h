@@ -49,7 +49,7 @@ typedef enum {
     UNKNOWN_MESSAGE     // Represents unrecognized sequences
 } MessageType;
 
-void interpret_message(uint64_t message, MessageType* result);
+void interpret_message(uint64_t* message, MessageType* result);
 void extract_request_uri(uint64_t message, uint64_t* uri);
 void extract_request_id_and_data(uint64_t message, uint64_t* request_id, uint64_t* data);
 void encode_confirmation(uint64_t request_id, uint64_t* encoded);

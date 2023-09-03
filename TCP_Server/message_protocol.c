@@ -18,12 +18,23 @@ static void encode_common_fields(uint64_t request_id, uint64_t flags, uint64_t* 
  * @param message The 64-bit encoded message.
  * @param result Pointer to MessageType enum where the interpreted type will be stored.
  */
-void interpret_message(uint64_t message, MessageType* result) {
-    if ((message & MESSAGE_TYPE_MASK) == 0) {
+void interpret_message(uint64_t* message, MessageType* result) {
+    //write_log_uint64_bin(_DEBUG, "Message Protocol - message to interpret", *message);
+    write_log(_DEBUG, "Message Protocol - message to interpret");
+    if ((*message & MESSAGE_TYPE_MASK) == 0) {
+        write_log(_INFO, "Message Protocol - Interpreted request.");
         *result = REQUEST_MESSAGE;
         return;
     }
-    *result = (message & RESPONSE_TYPE_MASK) ? RESPONSE_MESSAGE : CONFIRM_MESSAGE;
+    if (*message & RESPONSE_TYPE_MASK) {
+        write_log(_INFO, "Message Protocol - Interpreted response.");
+        *result = RESPONSE_MESSAGE;
+    }
+    else {
+        write_log(_INFO, "Message Protocol - Interpreted confirm.");
+        *result = CONFIRM_MESSAGE;
+    }
+    //*result = (message & RESPONSE_TYPE_MASK) ? RESPONSE_MESSAGE : CONFIRM_MESSAGE;
 }
 
 /**
@@ -36,6 +47,8 @@ void interpret_message(uint64_t message, MessageType* result) {
 void extract_request_id_and_data(uint64_t message, uint64_t* request_id, uint64_t* data) {
     *request_id = (message & REQUEST_ID_MASK) >> 55;
     *data = message & RESPONSE_DATA_MASK;
+    write_log_uint64_bin(_DEBUG, "Message Protocol - Extracted Request id", request_id);
+    write_log_uint64_bin(_DEBUG, "Message Protocol - Extracted Data", data);
 }
 
 /**
@@ -46,6 +59,7 @@ void extract_request_id_and_data(uint64_t message, uint64_t* request_id, uint64_
  */
 void extract_request_uri(uint64_t message, uint64_t* uri) {
     *uri = message & URI_MASK;
+    write_log_uint64_bin(_DEBUG, "Message Protocol - Extracted URI", uri);
 }
 
 /**
@@ -55,6 +69,7 @@ void extract_request_uri(uint64_t message, uint64_t* uri) {
  * @param encoded The pointer to the 64-bit integer where the encoded message will be stored.
  */
 void encode_confirmation(uint64_t request_id, uint64_t* encoded) {
+    *encoded = 0x0000000000000000;  // Reset the encoded value to zero before encoding
     encode_common_fields(request_id, MESSAGE_TYPE_MASK, encoded);
 }
 
@@ -66,8 +81,9 @@ void encode_confirmation(uint64_t request_id, uint64_t* encoded) {
  */
 void encode_request(uint64_t uri, uint64_t* encoded) {
     // Request messages have the message type bit set to 0
-    *encoded = 0;
+    *encoded = 0x0000000000000000;  // Reset the encoded value to zero before encoding
     *encoded |= uri & URI_MASK;
+    write_log_uint64_bin(_DEBUG, "Message Protocol - Encoded Request", encoded);
 }
 
 /**
@@ -78,6 +94,7 @@ void encode_request(uint64_t uri, uint64_t* encoded) {
  * @param encoded The pointer to the 64-bit integer where the encoded message will be stored.
  */
 void encode_response(uint64_t request_id, uint64_t data, uint64_t* encoded) {
+    *encoded = 0x0000000000000000;  // Reset the encoded value to zero before encoding
     encode_common_fields(request_id, MESSAGE_TYPE_MASK | RESPONSE_TYPE_MASK, encoded);
     *encoded |= data & RESPONSE_DATA_MASK;
 }

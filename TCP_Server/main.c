@@ -12,18 +12,18 @@ int create_threads(HANDLE* tcp_threads, server_thread_config** thread_configs);
 
 int main() {
     // Logging application start
-    write_log(_INFO, "Application started");
+    write_log(_INFO, "Main - Application started");
 
     // Initialization code
     init_logger(LOG_FILE);
     set_log_level(LOG_LEVEL);
-    write_log(_INFO, "Logger initialized");
+    write_log(_INFO, "Main - Logger initialized");
 
     // Create threads and initialize configs
     HANDLE tcp_threads[NUM_PORTS];
     server_thread_config* thread_configs[NUM_PORTS];
     if (!create_threads(tcp_threads, thread_configs)) {
-        write_log(_ERROR, "Failed to create threads and initialize configs");
+        write_log(_ERROR, "Main - Failed to create threads and initialize configs");
         return 1;
     }
 
@@ -39,7 +39,7 @@ int main() {
         free(thread_configs[i]);
     }
 
-    write_log(_INFO, "Cleanup completed");
+    write_log(_INFO, "Main - Cleanup completed");
 
     // Close logger
     close_logger();
@@ -52,7 +52,7 @@ int create_threads(HANDLE* tcp_threads, server_thread_config** thread_configs) {
         // Initialize server configuration
         tcp_socket_info* server_info_ptr = (tcp_socket_info*)malloc(sizeof(tcp_socket_info));
         if (server_info_ptr == NULL) {
-            write_log(_ERROR, "Error allocating memory for server_info");
+            write_log(_ERROR, "Main - Error allocating memory for server_info");
             return 0;
         }
 
@@ -61,7 +61,7 @@ int create_threads(HANDLE* tcp_threads, server_thread_config** thread_configs) {
 
         server_thread_config* server_thread_config_ptr = (server_thread_config*)malloc(sizeof(server_thread_config));
         if (server_thread_config_ptr == NULL) {
-            write_log(_ERROR, "Error allocating memory for server_thread_config");
+            write_log(_ERROR, "Main - Error allocating memory for server_thread_config");
             free(server_info_ptr);
             return 0;
         }
@@ -72,13 +72,13 @@ int create_threads(HANDLE* tcp_threads, server_thread_config** thread_configs) {
         // Create thread
         tcp_threads[i] = CreateThread(NULL, 0, tcp_server_thread, thread_configs[i], 0, NULL);
         if (tcp_threads[i] == NULL) {
-            write_log(_ERROR, "Error creating thread for a port");
+            write_log(_ERROR, "Main - Error creating thread for a port");
             free(server_thread_config_ptr->server_config);
             free(server_thread_config_ptr);
             return 0;
         }
     }
 
-    write_log(_INFO, "Threads and configurations successfully created");
+    write_log(_INFO, "Main - Threads and configurations successfully created");
     return 1;
 }

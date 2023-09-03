@@ -14,7 +14,7 @@ uint64_t handle_request(uint64_t uri) {
 
     case UNKNOWN_OPERATION:
     default:
-        write_log_uint64_hex(_ERROR, "unknown request uri", uri);
+        write_log_uint64_hex(_ERROR, "Request Handler - unknown request uri", uri);
         return 0; // or some error code in your protocol
     }
 }
