@@ -56,16 +56,22 @@ DWORD WINAPI tcp_server_thread(LPVOID thread_config) {
 
             // Interpret and handle the message
             MessageType messageType = { 0 };
-            interpret_message(&clientMsg, &messageType);
+            interpret_message(clientMsg, &messageType);
             switch (messageType) {
             case REQUEST_MESSAGE: {
                 uint64_t uri;
-                extract_request_uri(&clientMsg, &uri);
+                extract_request_uri(clientMsg, &uri);
+
+                write_log_format(_DEBUG, "Extracted URI: %llu", uri);  // Debug log for URI
+
                 uint64_t response_data = handle_request(&uri);
-                encode_response(responseMsg, messageid, &response_data);
+
+                write_log_format(_DEBUG, "Response data: %llu", response_data);  // Debug log for response data
+
+                encode_response(responseMsg, messageid, response_data); // Removed '&' before response_data
 
                 // Now send the response back to the client.
-                send_to_client(clientSocket, (const char*)&responseMsg, sizeof(responseMsg));
+                send_to_client(clientSocket, responseMsg, sizeof(responseMsg));
                 write_log(_INFO, "TCP Server Thread - Sent response to client.");
 
                 break;
