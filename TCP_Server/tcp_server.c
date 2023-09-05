@@ -49,7 +49,7 @@ SOCKET init_server(tcp_socket_info* socket_info) {
  * @param buffer The buffer to store the message read from the client.
  * @return The number of bytes read, -1 if an error occurs, or 0 if timed out.
  */
-int read_message_from_client(SOCKET clientSocket, char* buffer) {
+int read_message_from_client(SOCKET clientSocket, char* message, int message_size_bytes) {
     write_log(_DEBUG, "TCP Server - Starting read_message_from_client.");
     fd_set readSet;
     struct timeval timeout;
@@ -71,10 +71,10 @@ int read_message_from_client(SOCKET clientSocket, char* buffer) {
 
     int totalBytesRead = 0;
     int bytesRead = 0;
-    int bytesToRead = 8; // 64 bits
+    int bytesToRead = message_size_bytes; // 64 bits
 
     while (totalBytesRead < bytesToRead) {
-        bytesRead = recv(clientSocket, buffer + totalBytesRead, bytesToRead - totalBytesRead, 0);
+        bytesRead = recv(clientSocket, message + totalBytesRead, bytesToRead - totalBytesRead, 0);
         if (bytesRead == SOCKET_ERROR && WSAGetLastError() != 10053) {
             write_log_format(_ERROR, "TCP Server - Read from client failed. Error Code: %d", WSAGetLastError());
             return -1;
@@ -86,7 +86,7 @@ int read_message_from_client(SOCKET clientSocket, char* buffer) {
         totalBytesRead += bytesRead;
     }
 
-    write_log_byte_array(_DEBUG, buffer, totalBytesRead);
+    write_log_byte_array(_DEBUG, message, totalBytesRead);
     write_log_format(_DEBUG, "TCP Server - Received %d bytes from client.", totalBytesRead);
 
     return totalBytesRead;
@@ -139,43 +139,22 @@ int receive_from_client(SOCKET clientSocket, char* buffer, int bufferSize) {
  * @param responseLength The length of the data in bytes.
  */
 void send_to_client(SOCKET clientSocket, const char* response, int responseLength) {
-    // Log the original response as a byte array
+    write_log(_DEBUG, "TCP Server - Sending data to client,");
     write_log_byte_array(_DEBUG, response, responseLength);
-
-    // Create a buffer to hold the converted data
-    char* networkOrderBuffer = (char*)malloc(responseLength);
-    if (networkOrderBuffer == NULL) {
-        write_log_format(_ERROR, "TCP Server - Memory allocation failed.");
-        return;
-    }
-
-    // Apply the byte order conversion
-    for (int i = 0; i < responseLength; i += 8) { // assuming 8 bytes per integer (uint64_t)
-        uint64_t* srcInt = (uint64_t*)(response + i);
-        uint64_t* destInt = (uint64_t*)(networkOrderBuffer + i);
-
-        // Convert to network byte order
-        *destInt = htonll(*srcInt);  // Note: You may need to implement htonll if it's not available on your system
-    }
-
-    // Log the converted response as a byte array
-    write_log_byte_array(_DEBUG, networkOrderBuffer, responseLength);
 
     int bytesSent = 0;
     int totalBytesSent = 0;
 
     while (totalBytesSent < responseLength) {
-        bytesSent = send(clientSocket, networkOrderBuffer + totalBytesSent, responseLength - totalBytesSent, 0);
+        bytesSent = send(clientSocket, response + totalBytesSent, responseLength - totalBytesSent, 0);
         if (bytesSent <= 0) {
             int error = WSAGetLastError();
             write_log_format(_ERROR, "TCP Server - Failed to send data. Bytes sent: %d, Error code: %d", bytesSent, error);
-            free(networkOrderBuffer);  // Don't forget to free the buffer
+            free(response);  // Don't forget to free the buffer
             return;
         }
         totalBytesSent += bytesSent;
     }
-
-    free(networkOrderBuffer);  // Don't forget to free the buffer
 }
 
 /**

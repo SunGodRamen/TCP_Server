@@ -15,7 +15,7 @@ typedef struct {
 } tcp_socket_info;
 
 SOCKET init_server(tcp_socket_info* socket_info);
-int read_message_from_client(SOCKET clientSocket, char* buffer);
+int read_message_from_client(SOCKET clientSocket, char* message, int message_size_bytes);
 SOCKET accept_connection(SOCKET serverSocket);
 int receive_from_client(SOCKET clientSocket, char* buffer, int bufferSize);
 void send_to_client(SOCKET clientSocket, const char* response, int responseLength);

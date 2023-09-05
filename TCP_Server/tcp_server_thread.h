@@ -5,6 +5,7 @@
 #include "request_handler.h"
 #include "message_protocol.h"
 #include "logger.h"
+#include <stdbool.h>
 #include <windows.h>
 
 typedef struct {

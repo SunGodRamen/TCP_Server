@@ -1,7 +1,5 @@
 #include "tcp_server_thread.h"
 
-#define BUFFER_SIZE MESSAGE_SIZE_BYTES
-
 /**
  * TCP Server thread function.
  * Sets up and monitors the TCP server for incoming client messages,
@@ -41,36 +39,34 @@ DWORD WINAPI tcp_server_thread(LPVOID thread_config) {
         goto cleanup;
     }
 
-    char clientMsg[BUFFER_SIZE];
-    uint64_t message; // For simplicity, assuming all messages are 64 bits.
+    char clientMsg[MESSAGE_SIZE_BYTES];
+    char confirmMsg[MESSAGE_SIZE_BYTES];
+    char responseMsg[MESSAGE_SIZE_BYTES];
     while (1) {
         write_log(_DEBUG, "TCP Server Thread - Waiting to read message from client.");
-        uint64_t bytesRead = read_message_from_client(clientSocket, clientMsg);
-        if (bytesRead == sizeof(uint64_t)) {  // Ensure we read a full 64-bit message.
-            write_log(_INFO, "TCP Server Thread - Full 64-bit message received from client.");
-            // Convert the received message into a 64-bit number
-            memcpy(&message, clientMsg, sizeof(uint64_t));
+        int bytesRead = read_message_from_client(clientSocket, clientMsg, MESSAGE_SIZE_BYTES);
+        if (bytesRead == MESSAGE_SIZE_BYTES) {  // Ensure we read a full 64-bit message.
+            write_log_format(_INFO, "TCP Server Thread - Full %d-byte message received from client.", MESSAGE_SIZE_BYTES);
             // Send a confirmation for the received message
             messageid++;
-            uint64_t confirmation;
-            encode_confirmation(messageid, &confirmation);  // Assuming that the 'message' contains the request ID
-            send_to_client(clientSocket, (const char*)&confirmation, sizeof(confirmation));
-            write_log_format(_INFO, "TCP Server Thread - Sent confirmation %llx to client.", confirmation);
+            encode_confirmation(&confirmMsg, messageid, 0x01);  // Assuming that the 'message' contains the request ID
+            send_to_client(clientSocket, (const char*)&confirmMsg, sizeof(confirmMsg));
+            write_log(_INFO, "TCP Server Thread - Sent confirmation to client.");
+            write_log_byte_array(_INFO, confirmMsg, sizeof(confirmMsg));
 
             // Interpret and handle the message
             MessageType messageType = { 0 };
-            interpret_message(&message, &messageType);
+            interpret_message(&clientMsg, &messageType);
             switch (messageType) {
             case REQUEST_MESSAGE: {
                 uint64_t uri;
-                extract_request_uri(&message, &uri);
+                extract_request_uri(&clientMsg, &uri);
                 uint64_t response_data = handle_request(&uri);
-                uint64_t response = 0;
-                encode_response(message, response_data, &response);
+                encode_response(responseMsg, messageid, &response_data);
 
                 // Now send the response back to the client.
-                send_to_client(clientSocket, (const char*)&response, sizeof(uint64_t));
-                write_log_format(_INFO, "TCP Server Thread - Sent response %llx to client.", response);
+                send_to_client(clientSocket, (const char*)&responseMsg, sizeof(responseMsg));
+                write_log(_INFO, "TCP Server Thread - Sent response to client.");
 
                 break;
             }
