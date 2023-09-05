@@ -63,11 +63,9 @@ DWORD WINAPI tcp_server_thread(LPVOID thread_config) {
             switch (messageType) {
             case REQUEST_MESSAGE: {
                 uint64_t uri;
-                extract_request_uri(message, &uri);
-                uint64_t response_data = handle_request(uri);
+                extract_request_uri(&message, &uri);
+                uint64_t response_data = handle_request(&uri);
                 uint64_t response = 0;
-                if (response_data != 0) {
-                }
                 encode_response(message, response_data, &response);
 
                 // Now send the response back to the client.
