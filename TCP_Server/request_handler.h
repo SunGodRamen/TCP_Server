@@ -18,15 +18,15 @@ typedef enum {
 uint64_t handle_request(uint64_t* uri);
 
 // Get the current timestamp in milliseconds since the Unix epoch.
-#define URI_GET_TIME            0x1  // Binary: 1
+#define URI_GET_TIME            0x0000000000000001 
 uint64_t get_timestamp();
 
 // Get a random 64-bit number.
-#define URI_GET_RANDOM_NUMBER   0x2  // Binary: 10
+#define URI_GET_RANDOM_NUMBER   0x0000000000000002
 uint64_t get_random_number();
 
 // Get server name (represented as a 64-bit number)
-#define URI_GET_SERVER_NAME     0x3  // Binary: 11
+#define URI_GET_SERVER_NAME     0x0000000000000003
 uint64_t get_server_name();
 
 #endif
